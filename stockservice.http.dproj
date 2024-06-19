@@ -60,7 +60,7 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
         <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
-        <DCC_ExeOutput>.\$(Platform)\$(Config)</DCC_ExeOutput>
+        <DCC_ExeOutput>.\bin</DCC_ExeOutput>
         <DCC_E>false</DCC_E>
         <DCC_N>false</DCC_N>
         <DCC_S>false</DCC_S>
@@ -71,6 +71,8 @@
         <UWP_DelphiLogo44>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_44.png</UWP_DelphiLogo44>
         <UWP_DelphiLogo150>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_150.png</UWP_DelphiLogo150>
         <SanitizedProjectName>stockservice_http</SanitizedProjectName>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <DCC_UsePackage>vclwinx;DataSnapServer;fmx;vclie;DbxCommonDriver;bindengine;IndyIPCommon;VCLRESTComponents;DBXMSSQLDriver;FireDACCommonODBC;emsclient;aurelius;FMX_FlexCel_Components;appanalytics;IndyProtocols;vclx;Skia.Package.RTL;dbxcds;vcledge;FlexCel_Pdf;DBXFirebirdDriver;FireDACSqliteDriver;DbxClientDriver;soapmidas;dbexpress;inet;vcltouch;FMX_FlexCel_Core;FireDACDBXDriver;fmxdae;tmsbcl;VCL_FlexCel_Core;CustomIPTransport;FireDACMSSQLDriver;IndySystem;vclFireDAC;FlexCel_Render;FireDACCommon;DataSnapServerMidas;FireDACODBCDriver;emsserverresource;TMSMQTTPkgDXE15;bindcompdbx;rtl;FireDACMySQLDriver;VCL_FlexCel_Components;DBXSqliteDriver;TMSVCLUIPackPkgDXE15;DBXSybaseASEDriver;TMSWEBCorePkgDXE15;TMSMQTTPkgDEDXE15;vclimg;DataSnapFireDAC;inetdbxpress;FireDAC;xmlrtl;dsnap;xdata;FireDACDb2Driver;DBXOracleDriver;DBXInformixDriver;fmxobj;bindcompvclsmp;DataSnapNativeClient;DatasnapConnectorsFreePascal;TMSLogging;FMXTMSFNCCorePkgDXE15;emshosting;sparkle;FireDACCommonDriver;IndyIPClient;bindcompvclwinx;emsedge;bindcompfmx;TMSVCLUIPackPkgExDXE15;inetdb;FireDACASADriver;vclactnband;TMSVCLUIPackPkgXlsDXE15;fmxFireDAC;FireDACInfxDriver;DBXMySQLDriver;VclSmp;DataSnapCommon;fmxase;TMSVCLUIPackPkgWizDXE15;DBXOdbcDriver;dbrtl;FireDACOracleDriver;Skia.Package.FMX;FlexCel_XlsAdapter;FireDACMSAccDriver;DataSnapIndy10ServerTransport;FMXTMSFNCCloudPackPkgDXE15;PKIECtrl29;DataSnapConnectors;vcldsnap;DBXInterBaseDriver;FireDACMongoDBDriver;FireDACTDataDriver;Skia.Package.VCL;vcldb;FlexCel_Core;bindcomp;IndyCore;RESTBackendComponents;FireDACADSDriver;RESTComponents;IndyIPServer;vcl;dsnapxml;adortl;dsnapcon;DataSnapClient;DataSnapProviderClient;DBXDb2Driver;emsclientfiredac;FireDACPgDriver;FireDACDSDriver;tethering;bindcompvcl;CloudService;DBXSybaseASADriver;VCLTMSFNCCloudPackPkgDXE15;TMSWEBCorePkgLibDXE15;VCLTMSFNCCorePkgDXE15;soaprtl;soapserver;FireDACIBDriver;$(DCC_UsePackage)</DCC_UsePackage>
@@ -103,6 +105,8 @@
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_Locale>1033</VerInfo_Locale>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
@@ -123,6 +127,24 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
+        <DCCReference Include="src\UFrmMain.pas">
+            <Form>MainForm</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="src\UServerContainer.pas">
+            <Form>ServerContainer</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="src\services\UStockService.pas"/>
+        <DCCReference Include="src\services\UStockServiceImpl.pas"/>
+        <DCCReference Include="src\services\UStockService.Types.pas"/>
+        <DCCReference Include="src\UDatabaseManager.pas">
+            <Form>DatabaseManager</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="src\services\UStockServiceController.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -143,9 +165,13 @@
                 <Source>
                     <Source Name="MainSource">stockservice.http.dpr</Source>
                 </Source>
+                <Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k290.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp290.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="4">
-                <DeployFile LocalName="Win32\Debug\stockservice.http.exe" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="bin\stockservice.http.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>stockservice.http.exe</RemoteName>
                         <Overwrite>true</Overwrite>
