@@ -72,6 +72,7 @@ var
 begin
   // get symbols
   LSymbolResponse := await( Client.RawInvokeAsync('IStockService.Symbols', [] ) );
+
   // get years
   LYearsResponse := await( Client.RawInvokeAsync( 'IStockService.Years', [] ) );
 
