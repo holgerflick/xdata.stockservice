@@ -18,7 +18,7 @@ type
     function Years: TDTOYears;
     function Symbols: TDTOSymbols;
     function Historical( Symbol: String ): TDTOHistorical;
-    function LineChart( Symbol: String ): TJSONObject;
+    function LineChart( Symbol: String;  Year: Integer  = 0): TJSONObject;
   end;
 
 implementation
@@ -39,11 +39,11 @@ begin
   end;
 end;
 
-function TStockService.LineChart(Symbol: String): TJSONObject;
+function TStockService.LineChart(Symbol: String; Year: Integer): TJSONObject;
 begin
   var LStockServiceController := TStockServiceController.Create;
   try
-    Result := LStockServiceController.LineChart(Symbol);
+    Result := LStockServiceController.LineChart(Symbol, Year);
   finally
     LStockServiceController.Free;
   end;

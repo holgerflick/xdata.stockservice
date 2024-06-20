@@ -17,7 +17,7 @@ type
     [HttpGet] function Symbols: TDTOSymbols;
     [HttpGet] function Years: TDTOYears;
     [HttpGet] function Historical( Symbol: String ): TDTOHistorical;
-    [HttpGet] function LineChart( Symbol: String ): TJSONObject;
+    [HttpGet] function LineChart( Symbol: String; [XDefault(0)] Year: Integer = 0): TJSONObject;
   end;
 
 implementation

@@ -6,6 +6,7 @@ uses
     UStockService.Types
 
   , System.JSON
+  , System.SysUtils
   ;
 
 type
@@ -14,7 +15,7 @@ type
     function Years: TDTOYears;
     function Symbols: TDTOSymbols;
     function Historical( ASymbol: String ): TDTOHistorical;
-    function LineChart( ASymbol: String ): TJSONObject;
+    function LineChart( ASymbol: String; AYear: Integer ): TJSONObject;
   end;
 
 implementation
@@ -32,28 +33,31 @@ uses
 function TStockServiceController.Historical(ASymbol: String): TDTOHistorical;
 begin
   Result := TDTOHistorical.Create;
-
-  var LQuery := TDatabaseManager.Instance.GetQuery;
   try
-    LQuery.SQL.Text := 'SELECT * FROM stocks WHERE symbol = :symbol';
-    LQuery.ParamByName('symbol').AsString := ASymbol;
-    LQuery.Open;
+    var LQuery := TDatabaseManager.Instance.GetQuery;
+    try
+      LQuery.SQL.Text := 'SELECT * FROM stocks WHERE symbol = :symbol';
+      LQuery.ParamByName('symbol').AsString := ASymbol;
+      LQuery.Open;
 
-    if LQuery.Eof then
-    begin
-      raise EXDataHttpException.Create(404, 'No historical data found.');
+      if LQuery.Eof then
+      begin
+        raise EXDataHttpException.Create(404, 'No historical data found.');
+      end;
+
+      while not LQuery.eof do
+      begin
+        var LDay := TDTOHistoricalDay.Create(LQuery);
+
+        Result.Add(LDay);
+
+        LQuery.Next;
+      end;
+    finally
+      TDatabaseManager.Instance.ReleaseQuery(LQuery);
     end;
-
-    while not LQuery.eof do
-    begin
-      var LDay := TDTOHistoricalDay.Create(LQuery);
-
-      Result.Add(LDay);
-
-      LQuery.Next;
-    end;
-  finally
-    TDatabaseManager.Instance.ReleaseQuery(LQuery);
+  except
+    Result.Free;
   end;
 
 end;
@@ -79,62 +83,96 @@ end;
   }
 *)
 
-function TStockServiceController.LineChart(ASymbol: String): TJSONObject;
+function TStockServiceController.LineChart(ASymbol: String; AYear: Integer): TJSONObject;
 
 begin
   Result := TJSONObject.Create;
 
-  var LQuery := TDatabaseManager.Instance.GetQuery;
   try
-    LQuery.SQL.Text :=
-    '''
-      SELECT date, close
-        FROM stocks
-        WHERE (symbol = :symbol)
-        ORDER BY julianday(date) ASC
-    ''';
+    var LQuery := TDatabaseManager.Instance.GetQuery;
+    try
+      LQuery.SQL.Text :=
+      '''
+        SELECT date, close
+          FROM stocks
+          WHERE (symbol = :symbol)
+      ''';
 
-    // AND (strftime('%Y', date) = '2024')
+      if AYear > 0 then
+      begin
+        LQuery.SQL.Add( '   AND (strftime(''%Y'', date) = :year)' );
+      end;
 
-    LQuery.ParamByName('symbol').AsString := ASymbol;
-    LQuery.Open;
 
-    if LQuery.eof then
-    begin
-      raise EXDataHttpException.Create(404, 'Symbol not found.' );
+      LQuery.SQL.Add( '  ORDER BY julianday(date) ' );
+      //
+
+      LQuery.ParamByName('symbol').AsString := ASymbol;
+
+      if Assigned( LQuery.Params.FindParam( 'year' ) ) then
+      begin
+        LQuery.ParamByName('year').AsString := AYear.ToString;
+      end;
+
+      LQuery.Open;
+
+      if LQuery.eof then
+      begin
+        raise EXDataHttpException.Create(404, 'Symbol not found.' );
+      end;
+
+      var LValues := TJSONArray.Create;
+
+      while not LQuery.eof DO
+      begin
+        var LValue := TJSONObject.Create;
+        LValue.AddPair('x', LQuery.FieldByName('date').AsString );
+        LValue.AddPair('y', LQuery.FieldByName('close').AsFloat );
+
+        LValues.Add(LValue);
+
+        LQuery.Next;
+      end;
+
+      var LData := TJSONObject.Create;
+      var LDataSets := TJSONArray.Create;
+      var LDataSet := TJSONObject.Create;
+      LDataSet.AddPair('label', ASymbol);
+      LDataSet.AddPair('data', LValues );
+      LDataSet.AddPair('borderWidth', 3 );
+      LDataSet.AddPair('pointStyle', false );
+      LDataSet.AddPair('cubicInterpolationMode', 'default');
+      LDataSet.AddPair('tension', 0.2 );
+
+      LDataSets.Add(LDataSet);
+      LData.AddPair('datasets', LDataSets );
+
+
+      var LScalesY :=  TJSONObject.Create(
+            TJSONPair.Create( 'y',
+              TJSONObject.Create(
+                TJSONPair.Create( 'beginAtZero', true )
+              )
+            )
+          );
+
+
+      var LScales := TJSONObject.Create(
+        TJSONPair.Create( 'scales', LScalesY )
+        );
+
+
+      Result.AddPair('type', 'line');
+      Result.AddPair('data', LData );
+      Result.AddPair( 'options', LScales );
+
+
+    finally
+      TDatabaseManager.Instance.ReleaseQuery(LQuery);
     end;
-
-    var LValues := TJSONArray.Create;
-
-    while not LQuery.eof DO
-    begin
-      var LValue := TJSONObject.Create;
-      LValue.AddPair('x', LQuery.FieldByName('date').AsString );
-      LValue.AddPair('y', LQuery.FieldByName('close').AsFloat );
-
-      LValues.Add(LValue);
-
-      LQuery.Next;
-    end;
-
-    var LData := TJSONObject.Create;
-    var LDataSets := TJSONArray.Create;
-    var LDataSet := TJSONObject.Create;
-    LDataSet.AddPair('label', ASymbol);
-    LDataSet.AddPair('data', LValues );
-    LDataSet.AddPair('borderWidth', 3 );
-    LDataSet.AddPair('pointStyle', false );
-    LDataSet.AddPair('cubicInterpolationMode', 'default');
-    LDataSet.AddPair('tension', 0.2 );
-
-    LDataSets.Add(LDataSet);
-    LData.AddPair('datasets', LDataSets );
-
-    Result.AddPair('type', 'line');
-    Result.AddPair('data', LData );
-
-  finally
-    TDatabaseManager.Instance.ReleaseQuery(LQuery);
+  except
+    Result.Free;
+    raise;
   end;
 end;
 
@@ -142,26 +180,32 @@ function TStockServiceController.Symbols: TDTOSymbols;
 begin
   Result := TDTOSymbols.Create;
 
-  var LQuery := TDatabaseManager.Instance.GetQuery;
   try
-    LQuery.SQL.Text := 'SELECT DISTINCT symbol FROM stocks ORDER BY symbol';
-    LQuery.Open;
-    if LQuery.Eof then
-    begin
-      raise EXDataHttpException.Create(404, 'No symbols found.');
+
+    var LQuery := TDatabaseManager.Instance.GetQuery;
+    try
+      LQuery.SQL.Text := 'SELECT DISTINCT symbol FROM stocks ORDER BY symbol';
+      LQuery.Open;
+      if LQuery.Eof then
+      begin
+        raise EXDataHttpException.Create(404, 'No symbols found.');
+      end;
+
+      while not LQuery.eof do
+      begin
+        var LSymbol := TDTOSymbol.Create;
+        LSymbol.Name := LQuery.FieldByName('symbol').AsString;
+
+        Result.Add(LSymbol);
+
+        LQuery.Next;
+      end;
+    finally
+      TDatabaseManager.Instance.ReleaseQuery(LQuery);
     end;
-
-    while not LQuery.eof do
-    begin
-      var LSymbol := TDTOSymbol.Create;
-      LSymbol.Name := LQuery.FieldByName('symbol').AsString;
-
-      Result.Add(LSymbol);
-
-      LQuery.Next;
-    end;
-  finally
-    TDatabaseManager.Instance.ReleaseQuery(LQuery);
+  except
+    Result.Free;
+    raise;
   end;
 end;
 
@@ -169,29 +213,34 @@ function TStockServiceController.Years: TDTOYears;
 begin
   Result := TDTOYears.Create;
 
-  var LQuery := TDatabaseManager.Instance.GetQuery;
   try
-    LQuery.SQL.Text :=
-    '''
-      SELECT DISTINCT (strftime('%Y', date)) year
-        FROM stocks
-        ORDER BY year DESC
-    ''';
+    var LQuery := TDatabaseManager.Instance.GetQuery;
+    try
+      LQuery.SQL.Text :=
+      '''
+        SELECT DISTINCT (strftime('%Y', date)) year
+          FROM stocks
+          ORDER BY year DESC
+      ''';
 
-    LQuery.Open;
-    if LQuery.Eof then
-    begin
-      raise EXDataHttpException.Create(404, 'No data found.');
+      LQuery.Open;
+      if LQuery.Eof then
+      begin
+        raise EXDataHttpException.Create(404, 'No data found.');
+      end;
+
+      while not LQuery.eof do
+      begin
+        Result.Add( LQuery.FieldByName('year').AsInteger );
+
+        LQuery.Next;
+      end;
+    finally
+      TDatabaseManager.Instance.ReleaseQuery(LQuery);
     end;
-
-    while not LQuery.eof do
-    begin
-      Result.Add( LQuery.FieldByName('year').AsInteger );
-
-      LQuery.Next;
-    end;
-  finally
-    TDatabaseManager.Instance.ReleaseQuery(LQuery);
+  except
+    Result.Free;
+    raise;
   end;
 end;
 

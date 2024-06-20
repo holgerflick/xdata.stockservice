@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{473AABF8-9486-4273-ABB0-B3E643EAA3B6}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="server\stockservice.http.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="webcore\StocksChartWeb.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="stockservice_http">
+        <MSBuild Projects="server\stockservice.http.dproj"/>
+    </Target>
+    <Target Name="stockservice_http:Clean">
+        <MSBuild Projects="server\stockservice.http.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="stockservice_http:Make">
+        <MSBuild Projects="server\stockservice.http.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="StocksChartWeb">
+        <MSBuild Projects="webcore\StocksChartWeb.dproj"/>
+    </Target>
+    <Target Name="StocksChartWeb:Clean">
+        <MSBuild Projects="webcore\StocksChartWeb.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="StocksChartWeb:Make">
+        <MSBuild Projects="webcore\StocksChartWeb.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="stockservice_http;StocksChartWeb"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="stockservice_http:Clean;StocksChartWeb:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="stockservice_http:Make;StocksChartWeb:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
