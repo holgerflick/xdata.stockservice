@@ -15,6 +15,7 @@ uses
 type
   [ServiceImplementation]
   TStockService = class(TInterfacedObject, IStockService)
+    function Years: TDTOYears;
     function Symbols: TDTOSymbols;
     function Historical( Symbol: String ): TDTOHistorical;
     function LineChart( Symbol: String ): TJSONObject;
@@ -54,6 +55,16 @@ begin
   var LStockServiceController := TStockServiceController.Create;
   try
     Result := LStockServiceController.Symbols;
+  finally
+    LStockServiceController.Free;
+  end;
+end;
+
+function TStockService.Years: TDTOYears;
+begin
+  var LStockServiceController := TStockServiceController.Create;
+  try
+    Result := LStockServiceController.Years;
   finally
     LStockServiceController.Free;
   end;

@@ -11,6 +11,7 @@ uses
 type
   TStockServiceController = class
   public
+    function Years: TDTOYears;
     function Symbols: TDTOSymbols;
     function Historical( ASymbol: String ): TDTOHistorical;
     function LineChart( ASymbol: String ): TJSONObject;
@@ -156,6 +157,36 @@ begin
       LSymbol.Name := LQuery.FieldByName('symbol').AsString;
 
       Result.Add(LSymbol);
+
+      LQuery.Next;
+    end;
+  finally
+    TDatabaseManager.Instance.ReleaseQuery(LQuery);
+  end;
+end;
+
+function TStockServiceController.Years: TDTOYears;
+begin
+  Result := TDTOYears.Create;
+
+  var LQuery := TDatabaseManager.Instance.GetQuery;
+  try
+    LQuery.SQL.Text :=
+    '''
+      SELECT DISTINCT (strftime('%Y', date)) year
+        FROM stocks
+        ORDER BY year DESC
+    ''';
+
+    LQuery.Open;
+    if LQuery.Eof then
+    begin
+      raise EXDataHttpException.Create(404, 'No data found.');
+    end;
+
+    while not LQuery.eof do
+    begin
+      Result.Add( LQuery.FieldByName('year').AsInteger );
 
       LQuery.Next;
     end;
