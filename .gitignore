@@ -58,6 +58,9 @@ TMSWebIntermediate
 .git
 .svn
 *.user
-bin/
+bin/*
+!bin/
 !bin/*.db
+
+
 
