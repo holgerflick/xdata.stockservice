@@ -58,7 +58,7 @@ type
 
   TDTOHistorical = TList<TDTOHistoricalDay>;
 
-
+  TDTOYears = TList<Integer>;
 
 
 implementation
