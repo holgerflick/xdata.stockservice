@@ -10,6 +10,7 @@ object FrmMain: TFrmMain
   Font.Name = 'Arial'
   Font.Style = []
   ParentFont = False
+  OnDestroy = WebFormDestroy
   OnDOMContentLoaded = WebFormDOMContentLoaded
   object BtnShowChart: TWebButton
     Left = 48

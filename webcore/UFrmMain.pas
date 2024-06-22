@@ -5,7 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes, JS, Web, WEBLib.Graphics, WEBLib.Controls,
   WEBLib.Forms, WEBLib.Dialogs, WEBLib.Menus, WEBLib.StdCtrls, XData.Web.Client,
-  XData.Web.Connection, Vcl.Controls, Vcl.StdCtrls;
+  XData.Web.Connection, Vcl.Controls, Vcl.StdCtrls, UChartJS;
 
 type
   TFrmMain = class(TWebForm)
@@ -15,9 +15,10 @@ type
     procedure ConnectionConnect(Sender: TObject);
     procedure BtnShowChartClick(Sender: TObject);
     procedure WebFormDOMContentLoaded(Sender: TObject);
+    procedure WebFormDestroy(Sender: TObject);
   private
     { Private declarations }
-    FChart: TObject;
+    FChart: TChartJS;
 
     FSelectSymbol,
     FSelectYears: TJSHTMLSelectElement;
@@ -92,7 +93,6 @@ begin
       FSelectYears.appendChild(LOption);
     end;
 
-
     LSymbols := TJSArray( LSymbolResponse.ResultAsObject['value'] );
     FSelectSymbol := document.getElementById('SelectSymbol') as TJSHTMLSelectElement;
 
@@ -123,13 +123,6 @@ var
 
 
 begin
-  if Assigned( FChart ) then
-  begin
-    asm
-      this.FChart.destroy();
-    end;
-  end;
-
   LSymbol := FSelectSymbol.value;
   LYear := StrToInt( FSelectYears.value );
 
@@ -144,15 +137,19 @@ begin
   begin
     LData := TJSObject( LChartResponse.ResultAsObject );
 
-    asm
-      const ctx = document.getElementById('myChart');
-      this.FChart = new Chart( ctx, LData );
-    end;
+    FChart.Render(LData);
   end;
+end;
+
+procedure TFrmMain.WebFormDestroy(Sender: TObject);
+begin
+  FChart.Free;
 end;
 
 procedure TFrmMain.WebFormDOMContentLoaded(Sender: TObject);
 begin
+  FChart := TChartJS.Create('myChart');
+
   Connect;
 end;
 
