@@ -15,28 +15,35 @@
     <script src="scripts.js"></script>
   </head>
   <body>
-    <div class="container p-4">
+    <div
+      class="container d-flex-column gap-3 d-md-flex-row justify-content-lg-around">
       <div class="row">
-        <div class="col-3 d-flex gap-2 align-items-center">
-          <strong>Years:</strong>
+        <div class="col-12 col-md-4 d-flex gap-2 align-items-center my-2">
+          <strong class="w-50 w-md-50 text-end">Years:</strong>
           <select
-            class="form-select"
+            class="form-select flex-md-grow-1"
             id="SelectYear">
             <option value="*">All</option>
           </select>
-            
         </div>
-        <div class="col-3 d-flex gap-2 align-items-center">
-          <strong>Symbol:</strong>
+        <div class="col-12 col-md-4 d-flex gap-2 align-items-center my-2">
+          <strong class="w-50 text-end">Symbol:</strong>
           <select
-            class="form-select"
+            class="form-select flex-md-grow-1"
             id="SelectSymbol"></select>
         </div>
-        <div class="col-4 offset-2 justify-content-end">          
-          <button class="btn btn-success w-100" onclick="showChart()">Show in Chart</button>
+        <div class="col-12 col-md-4 justify-content-end my-2">
+          <button
+            class="btn btn-success w-100"
+            onclick="showChart()">
+            Show in Chart
+          </button>
+        </div>
       </div>
-      <div class="row">
-        <div class="col-12 px-2 mt-3">
+      <div class="row d-flex">
+        <div
+          class="chart-container"
+          style="position: relative; width: 100%; height: 100vh">
           <canvas id="myChart"></canvas>
         </div>
       </div>
