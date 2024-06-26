@@ -8,6 +8,8 @@ object ServerContainer: TServerContainer
   object Server: TXDataServer
     BaseUrl = 'http://+:80/'
     Dispatcher = Dispatcher
+    InstanceLoopHandling = Error
+    EntityLoopHandling = Error
     EntitySetPermissions = <>
     SwaggerOptions.Enabled = True
     SwaggerUIOptions.Enabled = True

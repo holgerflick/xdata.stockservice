@@ -8,6 +8,8 @@ uses
 
   , UStockService.Types
   , UStockService
+  , UChartJs
+  , UChartJsDataItem
 
   , System.JSON
   ;
@@ -18,7 +20,9 @@ type
     function Years: TDTOYears;
     function Symbols: TDTOSymbols;
     function Historical( Symbol: String ): TDTOHistorical;
-    function LineChart( Symbol: String;  Year: Integer  = 0): TJSONObject;
+    function LineChart(
+      Symbol: String;
+      [XDefault(0)] Year: Integer = 0): TChartJs<TPoint2D<string,double>>;
   end;
 
 implementation
@@ -39,7 +43,8 @@ begin
   end;
 end;
 
-function TStockService.LineChart(Symbol: String; Year: Integer): TJSONObject;
+function TStockService.LineChart(Symbol: String; [XDefault(0)] Year: Integer =
+    0): TChartJs<TPoint2D<string,double>>;
 begin
   var LStockServiceController := TStockServiceController.Create;
   try

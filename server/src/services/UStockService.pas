@@ -7,6 +7,9 @@ uses
 
   , UStockService.Types
 
+  , UChartJs
+  , UChartJsDataItem
+
   , System.JSON
   ;
 
@@ -17,7 +20,8 @@ type
     [HttpGet] function Symbols: TDTOSymbols;
     [HttpGet] function Years: TDTOYears;
     [HttpGet] function Historical( Symbol: String ): TDTOHistorical;
-    [HttpGet] function LineChart( Symbol: String; [XDefault(0)] Year: Integer = 0): TJSONObject;
+    [HttpGet] function LineChart( Symbol: String;
+      [XDefault(0)] Year: Integer = 0): TChartJs<TPoint2D<string,double>>;
   end;
 
 implementation

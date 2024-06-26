@@ -7,6 +7,15 @@ uses
 
   , System.JSON
   , System.SysUtils
+
+  , UChartJs
+  , UChartJsTypes
+  , UChartJsDataset
+  , UChartJsDataItem
+
+  , XData.Server.Module
+
+  , FireDAC.Stan.Param
   ;
 
 type
@@ -15,7 +24,7 @@ type
     function Years: TDTOYears;
     function Symbols: TDTOSymbols;
     function Historical( ASymbol: String ): TDTOHistorical;
-    function LineChart( ASymbol: String; AYear: Integer ): TJSONObject;
+    function LineChart( ASymbol: String; AYear: Integer ): TChartJs<TPoint2D<string, Double>>;
   end;
 
 implementation
@@ -83,97 +92,91 @@ end;
   }
 *)
 
-function TStockServiceController.LineChart(ASymbol: String; AYear: Integer): TJSONObject;
+function TStockServiceController.LineChart(ASymbol: String; AYear: Integer): TChartJs<TPoint2D<string, Double>>;
 
 begin
-  Result := TJSONObject.Create;
+  Result := TChartJs<TPoint2D<string, Double>>.Create;
+  TXDataOperationContext.Current.Handler.ManagedObjects.Add(Result);
 
+  var LQuery := TDatabaseManager.Instance.GetQuery;
   try
-    var LQuery := TDatabaseManager.Instance.GetQuery;
-    try
-      LQuery.SQL.Text :=
-      '''
-        SELECT date, close
-          FROM stocks
-          WHERE (symbol = :symbol)
-      ''';
+    LQuery.SQL.Text :=
+    '''
+      SELECT date, close
+        FROM stocks
+        WHERE (symbol = :symbol)
+    ''';
 
-      if AYear > 0 then
-      begin
-        LQuery.SQL.Add( '   AND (strftime(''%Y'', date) = :year)' );
-      end;
-
-
-      LQuery.SQL.Add( '  ORDER BY julianday(date) ' );
-      //
-
-      LQuery.ParamByName('symbol').AsString := ASymbol;
-
-      if Assigned( LQuery.Params.FindParam( 'year' ) ) then
-      begin
-        LQuery.ParamByName('year').AsString := AYear.ToString;
-      end;
-
-      LQuery.Open;
-
-      if LQuery.eof then
-      begin
-        raise EXDataHttpException.Create(404, 'Symbol not found.' );
-      end;
-
-      var LValues := TJSONArray.Create;
-
-      while not LQuery.eof DO
-      begin
-        var LValue := TJSONObject.Create;
-        LValue.AddPair('x', LQuery.FieldByName('date').AsString );
-        LValue.AddPair('y', LQuery.FieldByName('close').AsFloat );
-
-        LValues.Add(LValue);
-
-        LQuery.Next;
-      end;
-
-      var LData := TJSONObject.Create;
-      var LDataSets := TJSONArray.Create;
-      var LDataSet := TJSONObject.Create;
-      LDataSet.AddPair('label', ASymbol);
-      LDataSet.AddPair('data', LValues );
-      LDataSet.AddPair('borderWidth', 3 );
-      LDataSet.AddPair('pointStyle', false );
-      LDataSet.AddPair('cubicInterpolationMode', 'default');
-      LDataSet.AddPair('tension', 0.2 );
-
-      LDataSets.Add(LDataSet);
-      LData.AddPair('datasets', LDataSets );
-
-
-      var LScalesY :=  TJSONObject.Create(
-            TJSONPair.Create( 'y',
-              TJSONObject.Create(
-                TJSONPair.Create( 'beginAtZero', true )
-              )
-            )
-          );
-
-
-      var LScales := TJSONObject.Create(
-        TJSONPair.Create( 'scales', LScalesY )
-        );
-
-
-      Result.AddPair('type', 'line');
-      Result.AddPair('data', LData );
-      Result.AddPair( 'options', LScales );
-
-
-    finally
-      TDatabaseManager.Instance.ReleaseQuery(LQuery);
+    if AYear > 0 then
+    begin
+      LQuery.SQL.Add( '   AND (strftime(''%Y'', date) = :year)' );
     end;
-  except
-    Result.Free;
-    raise;
+
+    LQuery.SQL.Add( '  ORDER BY julianday(date) ' );
+    //
+
+    LQuery.ParamByName('symbol').AsString := ASymbol;
+
+    if Assigned( LQuery.Params.FindParam( 'year' ) ) then
+    begin
+      LQuery.ParamByName('year').AsString := AYear.ToString;
+    end;
+
+    LQuery.Open;
+
+    if LQuery.eof then
+    begin
+      raise EXDataHttpException.Create(404, 'Symbol not found.' );
+    end;
+
+    var LDataSet := TChartJsDataset<TPoint2D<string,double>>.Create;
+    LDataSet.DataLabel := ASymbol;
+    LDataSet.PointRadius := 0;
+    LDataSet.BorderWidth := 2;
+    LDataSet.CubicInterpolationMode := 'default';
+    LDataSet.Tension := 0.2;
+
+//    var LFill := TJSONObject.Create(
+//        TJSONPair.Create( 'value', 50 )
+//      );
+
+    var LFill := TJSONString.Create('origin');
+
+    LDataSet.Fill := LFill;
+
+    while not LQuery.eof DO
+    begin
+      var LDate := LQuery.FieldByName('date').AsString;
+      var LClose := LQuery.FieldByName('close').AsFloat;
+
+      var LPoint := TPoint2D<string, double>.Create( LDate, LClose );
+
+      LDataSet.Add( LPoint );
+
+      LQuery.Next;
+    end;
+
+    Result.AddDataSet(LDataSet);
+
+
+//      var LScalesY :=  TJSONObject.Create(
+//            TJSONPair.Create( 'y',
+//              TJSONObject.Create(
+//                TJSONPair.Create( 'beginAtZero', true )
+//              )
+//            )
+//          );
+//
+//
+//      var LScales := TJSONObject.Create(
+//        TJSONPair.Create( 'scales', LScalesY )
+//        );
+
+
+  finally
+    TDatabaseManager.Instance.ReleaseQuery(LQuery);
   end;
+
 end;
 
 function TStockServiceController.Symbols: TDTOSymbols;

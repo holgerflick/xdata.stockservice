@@ -9,9 +9,6 @@
         <Projects Include="webcore\StocksChartWeb.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="component\Flx.Web.ChartJS.dproj">
-            <Dependencies/>
-        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -38,23 +35,14 @@
     <Target Name="StocksChartWeb:Make">
         <MSBuild Projects="webcore\StocksChartWeb.dproj" Targets="Make"/>
     </Target>
-    <Target Name="Flx_Web_ChartJS">
-        <MSBuild Projects="component\Flx.Web.ChartJS.dproj"/>
-    </Target>
-    <Target Name="Flx_Web_ChartJS:Clean">
-        <MSBuild Projects="component\Flx.Web.ChartJS.dproj" Targets="Clean"/>
-    </Target>
-    <Target Name="Flx_Web_ChartJS:Make">
-        <MSBuild Projects="component\Flx.Web.ChartJS.dproj" Targets="Make"/>
-    </Target>
     <Target Name="Build">
-        <CallTarget Targets="stockservice_http;StocksChartWeb;Flx_Web_ChartJS"/>
+        <CallTarget Targets="stockservice_http;StocksChartWeb"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="stockservice_http:Clean;StocksChartWeb:Clean;Flx_Web_ChartJS:Clean"/>
+        <CallTarget Targets="stockservice_http:Clean;StocksChartWeb:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="stockservice_http:Make;StocksChartWeb:Make;Flx_Web_ChartJS:Make"/>
+        <CallTarget Targets="stockservice_http:Make;StocksChartWeb:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
