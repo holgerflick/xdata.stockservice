@@ -1,13 +1,13 @@
 let chart = null;
 
+const baseUrl = 'http://192.168.4.80';
+
 async function updateSelections() {
-  const yearsResponse = await fetch('http://192.168.4.71/StockService/Years');
+  const yearsResponse = await fetch(`${baseUrl}/StockService/Years`);
   const yearsJson = await yearsResponse.json();
   const years = yearsJson.value;
 
-  const symbolResponse = await fetch(
-    'http://192.168.4.71/StockService/Symbols'
-  );
+  const symbolResponse = await fetch(`${baseUrl}/StockService/Symbols`);
   const symbolJson = await symbolResponse.json();
   const symbols = symbolJson.value;
 
@@ -34,7 +34,7 @@ async function showChart() {
   const year = document.getElementById('SelectYear').value;
   const symbol = document.getElementById('SelectSymbol').value;
 
-  let url = 'http://192.168.4.71/StockService/LineChart?Symbol=' + symbol;
+  let url = baseUrl + '/StockService/LineChart?Symbol=' + symbol;
 
   if (year !== '*') {
     url = url + '&Year=' + year;
