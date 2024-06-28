@@ -56,7 +56,6 @@ end;
 
 { TChartJs }
 
-
 constructor TChartJs<T>.Create;
 begin
   inherited Create;
