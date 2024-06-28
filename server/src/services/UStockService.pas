@@ -21,7 +21,7 @@ type
     [HttpGet] function Years: TDTOYears;
     [HttpGet] function Historical( Symbol: String ): TDTOHistorical;
     [HttpGet] function LineChart( Symbol: String;
-      [XDefault(0)] Year: Integer = 0): TChartJs<TPoint2D<string,double>>;
+      [XDefault(0)] Year: Integer = 0): TChartJs<TDailyStockValue>;
   end;
 
 implementation

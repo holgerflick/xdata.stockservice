@@ -22,7 +22,7 @@ type
     function Historical( Symbol: String ): TDTOHistorical;
     function LineChart(
       Symbol: String;
-      [XDefault(0)] Year: Integer = 0): TChartJs<TPoint2D<string,double>>;
+      [XDefault(0)] Year: Integer = 0): TChartJs<TDailyStockValue>;
   end;
 
 implementation
@@ -44,7 +44,7 @@ begin
 end;
 
 function TStockService.LineChart(Symbol: String; [XDefault(0)] Year: Integer =
-    0): TChartJs<TPoint2D<string,double>>;
+    0): TChartJs<TDailyStockValue>;
 begin
   var LStockServiceController := TStockServiceController.Create;
   try

@@ -24,7 +24,7 @@ type
     function Years: TDTOYears;
     function Symbols: TDTOSymbols;
     function Historical( ASymbol: String ): TDTOHistorical;
-    function LineChart( ASymbol: String; AYear: Integer ): TChartJs<TPoint2D<string, Double>>;
+    function LineChart( ASymbol: String; AYear: Integer ): TChartJs<TDailyStockValue>;
   end;
 
 implementation
@@ -92,10 +92,14 @@ end;
   }
 *)
 
-function TStockServiceController.LineChart(ASymbol: String; AYear: Integer): TChartJs<TPoint2D<string, Double>>;
+function TStockServiceController.LineChart(ASymbol: String; AYear: Integer): TChartJs<TDailyStockValue>;
 
 begin
-  Result := TChartJs<TPoint2D<string, Double>>.Create;
+  Result := TChartJs<TDailyStockValue>.Create;
+
+  Result.Options.AddTimeAxis('x', 'month', 'MMM YYY' );
+  Result.Options.BeginAxisAtZero('y');
+
   TXDataOperationContext.Current.Handler.ManagedObjects.Add(Result);
 
   var LQuery := TDatabaseManager.Instance.GetQuery;
@@ -129,7 +133,7 @@ begin
       raise EXDataHttpException.Create(404, 'Symbol not found.' );
     end;
 
-    var LDataSet := TChartJsDataset<TPoint2D<string,double>>.Create;
+    var LDataSet := TChartJsDataset<TDailyStockValue>.Create;
     LDataSet.DataLabel := ASymbol;
     LDataSet.PointRadius := 0;
     LDataSet.BorderWidth := 2;
@@ -141,7 +145,6 @@ begin
 //      );
 
     var LFill := TJSONString.Create('origin');
-
     LDataSet.Fill := LFill;
 
     while not LQuery.eof DO
@@ -149,7 +152,7 @@ begin
       var LDate := LQuery.FieldByName('date').AsString;
       var LClose := LQuery.FieldByName('close').AsFloat;
 
-      var LPoint := TPoint2D<string, double>.Create( LDate, LClose );
+      var LPoint := TDailyStockValue.Create( LDate, LClose );
 
       LDataSet.Add( LPoint );
 
@@ -159,13 +162,7 @@ begin
     Result.AddDataSet(LDataSet);
 
 
-//      var LScalesY :=  TJSONObject.Create(
-//            TJSONPair.Create( 'y',
-//              TJSONObject.Create(
-//                TJSONPair.Create( 'beginAtZero', true )
-//              )
-//            )
-//          );
+
 //
 //
 //      var LScales := TJSONObject.Create(

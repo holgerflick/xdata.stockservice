@@ -47,6 +47,12 @@ type
     property Y: U read FY write FY;
   end;
 
+  TIntegerToDouble =  TPoint2D<Integer, Double>;
+  TStringToDouble = TPoint2D<String, Double>;
+
+  TDailyStockValue = TStringToDouble;
+
+
 implementation
 
 { TPoint2D<T, U> }

@@ -145,11 +145,12 @@
             <DesignClass>TDataModule</DesignClass>
         </DCCReference>
         <DCCReference Include="src\services\UStockServiceController.pas"/>
-        <DCCReference Include="src\UChartJs.pas"/>
-        <DCCReference Include="src\UChartJsTypes.pas"/>
-        <DCCReference Include="src\UChartJsDataset.pas"/>
-        <DCCReference Include="src\UChartJsDataItem.pas"/>
-        <DCCReference Include="src\UChartJsOptions.pas"/>
+        <DCCReference Include="src\ChartJs\UChartJs.pas"/>
+        <DCCReference Include="src\ChartJs\UChartJsDataItem.pas"/>
+        <DCCReference Include="src\ChartJs\UChartJsDataset.pas"/>
+        <DCCReference Include="src\ChartJs\UChartJsManager.pas"/>
+        <DCCReference Include="src\ChartJs\UChartJsOptions.pas"/>
+        <DCCReference Include="src\ChartJs\UChartJsTypes.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

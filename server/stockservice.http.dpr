@@ -9,11 +9,12 @@ uses
   UStockService.Types in 'src\services\UStockService.Types.pas',
   UDatabaseManager in 'src\UDatabaseManager.pas' {DatabaseManager: TDataModule},
   UStockServiceController in 'src\services\UStockServiceController.pas',
-  UChartJs in 'src\UChartJs.pas',
-  UChartJsTypes in 'src\UChartJsTypes.pas',
-  UChartJsDataset in 'src\UChartJsDataset.pas',
-  UChartJsDataItem in 'src\UChartJsDataItem.pas',
-  UChartJsOptions in 'src\UChartJsOptions.pas';
+  UChartJs in 'src\ChartJs\UChartJs.pas',
+  UChartJsDataItem in 'src\ChartJs\UChartJsDataItem.pas',
+  UChartJsDataset in 'src\ChartJs\UChartJsDataset.pas',
+  UChartJsManager in 'src\ChartJs\UChartJsManager.pas',
+  UChartJsOptions in 'src\ChartJs\UChartJsOptions.pas',
+  UChartJsTypes in 'src\ChartJs\UChartJsTypes.pas';
 
 {$R *.res}
 
