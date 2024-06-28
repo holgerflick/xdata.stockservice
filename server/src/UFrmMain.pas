@@ -7,16 +7,20 @@ uses
   , System.SysUtils
   , System.Variants
 
+  , Winapi.Messages
+  , Winapi.Windows
+
   , Vcl.Controls
   , Vcl.Dialogs
   , Vcl.Forms
   , Vcl.Graphics
   , Vcl.StdCtrls
 
-  , Winapi.Messages
-  , Winapi.Windows
-
   , UServerContainer
+  , Vcl.ExtCtrls
+  , Vcl.BaseImageCollection
+  , Vcl.ImageCollection
+  , Vcl.VirtualImage
   ;
 
 
@@ -25,11 +29,17 @@ type
     txtLog: TMemo;
     btStart: TButton;
     btStop: TButton;
+    Logo: TVirtualImage;
+    ImageCollection: TImageCollection;
+    VirtualImage1: TVirtualImage;
+    btSwagger: TButton;
     procedure btStartClick(ASender: TObject);
     procedure btStopClick(ASender: TObject);
+    procedure btSwaggerClick(Sender: TObject);
     procedure FormCreate(ASender: TObject);
   strict private
     procedure UpdateGUI;
+    procedure ShowSwagger;
 
   public
     procedure Log( AText: String; ATimeStamp: Boolean = true );
@@ -44,7 +54,8 @@ implementation
 {$R *.dfm}
 
 uses
-  System.DateUtils
+    System.DateUtils
+  , WinApi.ShellAPI
   ;
 
 resourcestring
@@ -63,6 +74,11 @@ procedure TMainForm.btStopClick(ASender: TObject);
 begin
   TServerContainer.Instance.Stop;
   UpdateGUI;
+end;
+
+procedure TMainForm.btSwaggerClick(Sender: TObject);
+begin
+  ShowSwagger;
 end;
 
 procedure TMainForm.FormCreate(ASender: TObject);
@@ -84,6 +100,12 @@ begin
   txtLog.Lines.Append(LLine);
 end;
 
+procedure TMainForm.ShowSwagger;
+begin
+  var LUrl := TServerContainer.Instance.ExternalUrl + 'swaggerui';
+  ShellExecute( self.Handle, 'open', pWideChar( LUrl ), '', '',  SW_SHOWNORMAL );
+end;
+
 procedure TMainForm.UpdateGUI;
 const
   cHttp = 'http://+';
@@ -91,6 +113,7 @@ const
 begin
   btStart.Enabled := not TServerContainer.Instance.Active;
   btStop.Enabled := not btStart.Enabled;
+  btSwagger.Enabled := not btStart.Enabled;
   if TServerContainer.Instance.Active then
     Log(SServerStartedAt + StringReplace(
       TServerContainer.Instance.BaseUrl,

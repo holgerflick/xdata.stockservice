@@ -71,32 +71,9 @@ begin
 
 end;
 
-(*
-{
-    type: 'bar',
-    data: {
-      labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-      datasets: [{
-        label: '# of Votes',
-        data: [12, 19, 3, 5, 2, 3],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
-    }
-  }
-*)
-
 function TStockServiceController.LineChart(ASymbol: String; AYear: Integer): TChartJs<TDailyStockValue>;
-
 begin
   Result := TChartJs<TDailyStockValue>.Create;
-
   Result.Options.AddTimeAxis('x', 'month', 'MMM YYY' );
   Result.Options.BeginAxisAtZero('y');
 
@@ -117,7 +94,6 @@ begin
     end;
 
     LQuery.SQL.Add( '  ORDER BY julianday(date) ' );
-    //
 
     LQuery.ParamByName('symbol').AsString := ASymbol;
 
@@ -140,6 +116,7 @@ begin
     LDataSet.CubicInterpolationMode := 'default';
     LDataSet.Tension := 0.2;
 
+//  -- Alternative: filling everything up to 50
 //    var LFill := TJSONObject.Create(
 //        TJSONPair.Create( 'value', 50 )
 //      );
@@ -160,16 +137,6 @@ begin
     end;
 
     Result.AddDataSet(LDataSet);
-
-
-
-//
-//
-//      var LScales := TJSONObject.Create(
-//        TJSONPair.Create( 'scales', LScalesY )
-//        );
-
-
   finally
     TDatabaseManager.Instance.ReleaseQuery(LQuery);
   end;

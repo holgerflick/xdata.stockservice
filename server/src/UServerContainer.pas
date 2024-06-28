@@ -32,12 +32,14 @@ type
     class var FInstance: TServerContainer;
 
   private
+
     function GetActive: Boolean;
     function GetBaseUrl: String;
+    function GetExternalUrl: String;
 
 
   public
-    
+
 
     class function Instance: TServerContainer;
     class destructor Destroy;
@@ -47,6 +49,7 @@ type
 
     property Active: Boolean read GetActive;
     property BaseUrl: String read GetBaseUrl;
+    property ExternalUrl: String read GetExternalUrl;
 
   public
   end;
@@ -78,6 +81,12 @@ begin
   Result := Server.BaseUrl;
 end;
 
+
+function TServerContainer.GetExternalUrl: String;
+begin
+  // TODO: this is hard-coded
+  Result := 'http://192.168.4.80/';
+end;
 
 class function TServerContainer.Instance: TServerContainer;
 begin
